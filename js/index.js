@@ -94,7 +94,7 @@ function simplifyText(event) {
       for (var row=0; row<totalRows; row++) {
         htmlTable += "<tr>";
         for (var column=0; column<table.length; column++) {
-          htmlTable += "<td>" + table[column][row] + "</td>";
+          htmlTable += "<td class='" + (table[column][row]?"on":"off") + "'>" + table[column][row] + "</td>";
         }
         htmlTable += "</tr>";
       }      

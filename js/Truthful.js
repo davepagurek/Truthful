@@ -319,7 +319,7 @@ var Truthful = (function() {
         
         //Find the last instance of each operator in the string
         var addition = findLast("+", input);
-        
+
         var bracket1 = findLast("(", input);
 
         var not = findLast("!", input);
@@ -363,7 +363,7 @@ var Truthful = (function() {
         //If there are no operators, just push the input itself
         } else {
           //var xLocation=input.toLowerCase().indexOf("x");
-          if (/^[a-z0-9]+$/i.test(input)) {
+          if (/^[a-z][a-z0-9]*$/i.test(input)) {
           //if (xLocation!=-1) {
             /*if (xLocation>0) {
               this.sections.push(new Segment(input.substring(0, xLocation)));

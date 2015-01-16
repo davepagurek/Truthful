@@ -29,8 +29,8 @@ var show = function(element) {
 function simplifyText(event) {
 
   //Grabs data from input elements
-  var input = document.getElementById("input").value;
-  
+  var input = document.getElementById("input").value.split(",");
+
   //Makes the results pane close
   hide(document.getElementById("wrapper"));
 
@@ -41,12 +41,21 @@ function simplifyText(event) {
 
     document.getElementById("result").innerHTML = "";
 
-    var inputFunction = Truthful.createExpression(input);
+    var inputFunction = [];
+    for (var i=0; i<input.length; i++) {
+        inputFunction.push(Truthful.createExpression(input[i]));
+    }
 
     //If there are no errors, show the graph
     if (!Truthful.hasErrors()) {
       var inputFormula = document.createElement("div");
-      var variablesObj = inputFunction.variables();
+      var variablesObj = {};
+      for (i=0; i<inputFunction.length; i++) {
+          var fnVariables = inputFunction[i].variables();
+          for (var key in fnVariables) {
+              variablesObj[key] = 1;
+          }
+      }
       var variables = [];
       for (var key in variablesObj) {
         variables.push(key);
@@ -74,14 +83,18 @@ function simplifyText(event) {
         col++;
       }
 
-      table.push([]);
+      for (var i=0; i<inputFunction.length; i++) {
+        table.push([]);
+      }
       for (var row=0; row<totalRows; row++) {
         var values = {};
         for (var column=0; column<table.length-1; column++) {
           values[variables[column]]=table[column][row];
         }
 
-        table[col].push(inputFunction.result(values));
+        for (i=0; i<inputFunction.length; i++) {
+            table[variables.length+i].push(inputFunction[i].result(values));
+        }
       }
 
       htmlTable += "<table><tr>";
@@ -89,15 +102,18 @@ function simplifyText(event) {
       for (var i=0; i<variables.length; i++) {
         htmlTable += "<th>" + variables[i] + "</th>";
       }
-      htmlTable += "<th>" + input + "</th></tr>"
+      for (i=0; i<input.length; i++) {
+          htmlTable += "<th>" + input[i] + "</th>";
+      }
+      htmlTable += "</tr>";
 
       for (var row=0; row<totalRows; row++) {
         htmlTable += "<tr>";
         for (var column=0; column<table.length; column++) {
-          htmlTable += "<td class='" + (table[column][row]?"on":"off") + "'>" + table[column][row] + "</td>";
+          htmlTable += "<td class='" + (table[column][row]?"on":"off") + ((column==variables.length)?" firstResult":"") + "'>" + table[column][row] + "</td>";
         }
         htmlTable += "</tr>";
-      }      
+      }
 
       htmlTable += "</table>";
 

@@ -19,6 +19,8 @@ var Truthful = (function() {
             }
             if (this.operator=="+") {
                 return new Segment(v1 || v2);
+            } else if (this.operator == "#") {
+                return (new Segment((v1 && !v2) || (!v1 && v2)));
             } else if  (this.operator=="*") {
                 return  new Segment(v1 && v2);
             }
@@ -90,7 +92,7 @@ var Truthful = (function() {
             } else {
                 index=value.indexOf(operator); //Look for the first instead of last if it's an exponent
             }
-            var operators="+*'!";
+            var operators="+*'!#";
             while (inBrackets) {
                 var openBrackets=0;
 
@@ -141,7 +143,7 @@ var Truthful = (function() {
             var inBracketsClosed=true;
             var indexOpen=-1;
             var indexClosed=-1;
-            var operators="+*'!";
+            var operators="+*'!#";
 
             indexOpen=value.lastIndexOf("(");
             indexClosed=value.lastIndexOf(")");
@@ -317,6 +319,7 @@ var Truthful = (function() {
 
                 //Find the last instance of each operator in the string
                 var addition = findLast("+", input);
+                var xor = findLast("#", input);
 
                 var bracket1 = findLast("(", input);
 
@@ -326,10 +329,14 @@ var Truthful = (function() {
                 var multiplication2 = findMultiplicationBrackets(input); //Find brackets that are the same as multiplication
 
                 //Push back each half of the equation into a section, in reverse order of operations
-                if (addition != -1) {
+                if (addition != -1 && Math.max(addition, xor)==addition) {
                     this.sections.push(new Segment(input.substring(0, addition)));
                     this.sections.push(new Segment(input.substring(addition+1)));
                     this.operator = new Operator("+");
+                } else if (xor != -1) {
+                    this.sections.push(new Segment(input.substring(0, xor)));
+                    this.sections.push(new Segment(input.substring(xor+1)));
+                    this.operator = new Operator("#");
                 } else if (multiplication2 != -1 && Math.max(multiplication2, multiplication)==multiplication2) {
                     this.sections.push(new Segment(input.substring(0, multiplication2)));
                     this.sections.push(new Segment(input.substring(multiplication2)));
@@ -449,8 +456,18 @@ var Truthful = (function() {
     };
 
     worker.truthTable = function(input) {
+        var functions = [];
         var expressions = Array.prototype.map.call(input, function(element) {
-            return worker.createExpression(element);
+
+            //Get function name if it exists
+            var match =  /^\s*(.+)\s*=(.+)$/.exec(element);
+            if (match) {
+                functions.push(match[1]);
+                return worker.createExpression(match[2]);
+            } else {
+                functions.push(element);
+                return worker.createExpression(element);
+            }
         });
         var variablesObj = {};
 
@@ -507,8 +524,8 @@ var Truthful = (function() {
         for (var i=0; i<variables.length; i++) {
             htmlTable += "<th>" + variables[i] + "</th>";
         }
-        for (i=0; i<input.length; i++) {
-            htmlTable += "<th>" + input[i] + "</th>";
+        for (i=0; i<functions.length; i++) {
+            htmlTable += "<th>" + functions[i] + "</th>";
         }
         htmlTable += "</tr>";
 

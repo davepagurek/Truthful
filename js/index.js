@@ -80,16 +80,9 @@ window.onload = function() {
     document.getElementById("calculate").addEventListener("click", processInput);
     document.getElementById("input").addEventListener("keyup", onKeyUp);
 
-    var $_GET = {};
-    var args = location.search.substr(1).split(/&/);
-    for (var i=0; i<args.length; ++i) {
-        var tmp = args[i].split(/=/);
-        if (tmp[0] != "") {
-            $_GET[decodeURIComponent(tmp[0])] = decodeURIComponent(tmp.slice(1).join("").replace("+", " "));
-        }
-    }
-    if ($_GET["input"]) {
-        document.getElementById("input").value = $_GET["input"];
+    var q = new QueryString();
+    if (q.value("input")) {
+        document.getElementById("input").value = q.value("input");
     }
 
     processInput(false);

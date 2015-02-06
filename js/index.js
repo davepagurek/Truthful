@@ -57,11 +57,12 @@ var calculate = function(input) {
 function processInput(event) {
 
     //Grabs data from input elements
-    var input = document.getElementById("input").value.split(",");
+    var raw = document.getElementById("input").value;
+    var input = raw.split(",");
 
     if (event) {
         //Make this to the browser history
-        window.history.pushState({"input":input});
+        window.history.pushState({"input":input}, "Truthful: " + raw, "?input=" + encodeURIComponent(raw));
     }
 
     calculate(input);
@@ -78,6 +79,19 @@ window.onload = function() {
     var initial = document.getElementById("input").value;
     document.getElementById("calculate").addEventListener("click", processInput);
     document.getElementById("input").addEventListener("keyup", onKeyUp);
+
+    var $_GET = {};
+    var args = location.search.substr(1).split(/&/);
+    for (var i=0; i<args.length; ++i) {
+        var tmp = args[i].split(/=/);
+        if (tmp[0] != "") {
+            $_GET[decodeURIComponent(tmp[0])] = decodeURIComponent(tmp.slice(1).join("").replace("+", " "));
+        }
+    }
+    if ($_GET["input"]) {
+        document.getElementById("input").value = decodeURIComponent($_GET["input"]);
+    }
+
     processInput(false);
 
     window.onpopstate = function (event) {

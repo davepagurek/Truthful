@@ -89,7 +89,7 @@ window.onload = function() {
         }
     }
     if ($_GET["input"]) {
-        document.getElementById("input").value = decodeURIComponent($_GET["input"]);
+        document.getElementById("input").value = $_GET["input"];
     }
 
     processInput(false);

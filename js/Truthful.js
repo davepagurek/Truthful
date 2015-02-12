@@ -19,10 +19,16 @@ var Truthful = (function() {
             }
             if (this.operator=="+") {
                 return new Segment(v1 || v2);
+            } else if (this.operator=="!+") {
+                return new Segment(!(v1 || v2));
             } else if (this.operator == "#") {
                 return (new Segment((v1 && !v2) || (!v1 && v2)));
+            } else if (this.operator == "!#") {
+                return (new Segment(!((v1 && !v2) || (!v1 && v2))));
             } else if  (this.operator=="*") {
                 return  new Segment(v1 && v2);
+            } else if  (this.operator=="!*") {
+                return  new Segment(!(v1 && v2));
             }
         };
     }
@@ -123,6 +129,56 @@ var Truthful = (function() {
                                     index = (index+1+value.substring(index+1).indexOf(operator));
                                 }
                             }
+                        }
+                    }
+                }
+
+                //If no more operators are found, break the loop
+                if (index==-1) {
+                    inBrackets=false;
+                }
+            }
+            return index;
+        };
+
+        var findLastOperator = function(operator, value) {
+            var matches=0;
+            var index=-1;
+            var r=0;
+            if (operator=="+") {
+                r=/(!)?\+/g;
+            } else if (operator=="*") {
+                r=/(!)?\*/g;
+            } else if (operator=="#") {
+                r=/(!)?#/g;
+            } else {
+                return -1;
+            }
+            for (matches=r.exec(value); matches; matches=r.exec(value)) if (RegExp.$1 != "!") index=matches.index;
+            var inBrackets=true;
+            while (inBrackets && index!=-1) {
+                var openBrackets=0;
+
+                //Find how many brackets are opened or closed at a given point in the string
+                for (var i=0; i<value.length; i++) {
+                    if (value.substr(i, 1)=="(") {
+                        openBrackets++;
+                    } else if (value.substr(i, 1)==")") {
+                        openBrackets--;
+                    }
+
+                    if (i==index) {
+
+                        //If no brackets are open (and if the operator is actually - and not just a minus sign), break the loop.
+                        if (openBrackets===0) {
+                            inBrackets=false;
+                            break;
+
+                            //Otherwise, find the next operator, and loop through again to see if that one is in brackets
+                        } else {
+                            var sub = value.substring(0, index);
+                            index=-1;
+                            for (matches=r.exec(sub); matches; matches=r.exec(sub)) if (RegExp.$1 != "a") index=matches.index;
                         }
                     }
                 }
@@ -318,25 +374,40 @@ var Truthful = (function() {
                 input = removeBrackets(input);
 
                 //Find the last instance of each operator in the string
-                var addition = findLast("+", input);
-                var xor = findLast("#", input);
+                var nor = findLast("!+", input);
+                var or = findLastOperator("+", input);
+                var xnor = findLast("!#", input);
+                var xor = findLastOperator("#", input);
 
                 var bracket1 = findLast("(", input);
 
                 var not = findLast("!", input);
 
-                var multiplication = findLast("*", input);
+                var nand = findLast("!*", input);
+                var multiplication = findLastOperator("*", input);
                 var multiplication2 = findMultiplicationBrackets(input); //Find brackets that are the same as multiplication
 
                 //Push back each half of the equation into a section, in reverse order of operations
-                if (addition != -1 && Math.max(addition, xor)==addition) {
-                    this.sections.push(new Segment(input.substring(0, addition)));
-                    this.sections.push(new Segment(input.substring(addition+1)));
+                if (nor != -1 && Math.max(nor, or, xnor, xor)==nor) {
+                    this.sections.push(new Segment(input.substring(0, nor)));
+                    this.sections.push(new Segment(input.substring(nor+2)));
+                    this.operator = new Operator("!+");
+                } else if (or != -1 && Math.max(or, xnor, xor)==or) {
+                    this.sections.push(new Segment(input.substring(0, or)));
+                    this.sections.push(new Segment(input.substring(or+1)));
                     this.operator = new Operator("+");
+                } else if (xnor != -1 && Math.max(xnor, xor)==xnor) {
+                    this.sections.push(new Segment(input.substring(0, xnor)));
+                    this.sections.push(new Segment(input.substring(xnor+2)));
+                    this.operator = new Operator("!#");
                 } else if (xor != -1) {
                     this.sections.push(new Segment(input.substring(0, xor)));
                     this.sections.push(new Segment(input.substring(xor+1)));
                     this.operator = new Operator("#");
+                } else if (nand != -1 && Math.max(nand, multiplication2, multiplication)==nand) {
+                    this.sections.push(new Segment(input.substring(0, nand)));
+                    this.sections.push(new Segment(input.substring(nand+2)));
+                    this.operator = new Operator("!*");
                 } else if (multiplication2 != -1 && Math.max(multiplication2, multiplication)==multiplication2) {
                     this.sections.push(new Segment(input.substring(0, multiplication2)));
                     this.sections.push(new Segment(input.substring(multiplication2)));

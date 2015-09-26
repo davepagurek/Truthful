@@ -1,8 +1,8 @@
-<h1>Truthful</h1>
+# Truthful [![Build Status](https://travis-ci.org/davepagurek/Truthful.svg)](https://travis-ci.org/davepagurek/Truthful)
 Calculate truth tables from a boolean algebraic expressions
 Live version at http://davepagurek.com/truthful/
 
-<h2>Using Truthful.js</h2>
+## Using Truthful.js
 
 Fork the repo and set up dependencies:
 ```
@@ -20,7 +20,7 @@ Include the Javascript file in your HTML:
 var Truthful = require("./js/Truthful.js");
 ```
 
-<h3>Expressions</h3>
+### Expressions
 Create an algebraic expression like this:
 ```javascript
 var expression = Truthful.expression("!(b|c|a)");
@@ -51,7 +51,7 @@ Truthful.expression("a|b&(!c)").string()
 // Returns "(a|(b&(!c)))"
 ```
 
-<h3>Truth Tables</h3>
+### Truth Tables
 Get an HTML `<table>` element of a truth table by passing an input string:
 ```javascript
 var table = Truthful.truthTable("a => !(b|c|a)");
@@ -88,10 +88,10 @@ Returns
 */
 ```
 
-<h3>Error handling</h3>
+### Error handling
 If there is an error with user input, Truthful will throw a `new Error()` with a useful message. If using Truthful for arbitrary user data, it is recommended to parse input in a `try { } catch (err) { }` and show the user `err.message`.
 
-<h2>Contributing</h2>
+## Contributing
 - Make an issue on GitHub if you notice a broken feature
 - Fork the repo and make a branch for any updates
 - After cloning locally, run `npm install`

@@ -54,9 +54,18 @@ a {
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
-  overflow-y:hidden;
+  overflow-y:auto;
   overflow-x:auto;
   background-color:#524656;
+  transition: all 0.3s ease;
+}
+#wrapper.covered {
+  width:0;
+  overflow-x: hidden;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
 }
 h1 {
   font-family: 'Open Sans', sans-serif;
@@ -89,22 +98,26 @@ button, a.button {
   padding:0 10px;
   line-height:45px;
   vertical-align:bottom;
-  border-radius:0 5px 5px 0;
   text-decoration:none;
   display:block;
   border:0;
   height:40px;
   box-sizing:border-box;
-  width:50px;
   font-size:16px;
   font-family:sans-serif;
-  margin:10px 0;
+  border-radius: 5px;
+  margin:30px auto;
   -webkit-transition: all 0.3s ease;
   transition: all 0.3s ease;
   cursor:pointer;
 }
 button:hover, a.button:hover {
   background-color:#B8D6DF;
+}
+#top button, #top a.button {
+  border-radius:0 5px 5px 0;
+  margin:10px 0;
+  width:50px;
 }
 input[type="text"] {
   background-color:rgba(255,255,255,0.2);
@@ -157,6 +170,41 @@ input[type="text"]:focus {
   -webkit-transform: scaleY(1);
   -ms-transform: scaleY(1);
   transform: scaleY(1);
+}
+#george_container {
+  padding: 20px 0;
+  text-align:center;
+  width: 0;
+  background-color:#333745;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  transition: all 0.4s ease;
+}
+#george_container.open {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  padding: 20px;
+  flex: 1;
+  width:auto;
+  overflow-x:auto;
+}
+#george_container pre {
+  display:inline-block;
+  box-sizing: border-box;
+  padding:20px;
+  border:0;
+  border-radius:5px;
+  background-color:rgba(0,0,0,0.4);
+  color:#FFF;
+  font-family: monospace;
+  font-size: 13px;
+  width:auto;
+  height:auto;
 }
 
 
@@ -217,6 +265,27 @@ table tr:last-child td {
     display:block;
     width:auto;
   }
+  #george_container {
+    width:auto;
+    max-height:0;
+    overflow:hidden;
+    padding: 0 20px;
+  }
+  #george_container.open {
+    max-height:1000px;
+  }
+  #wrapper {
+    max-height:1000px;
+  }
+  #wrapper.covered {
+    max-height:0;
+    width:auto;
+    overflow: hidden;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0;
+    -ms-flex: 0;
+    flex: 0;
+  }
 }
 
 @media all and (max-width:500px) {
@@ -240,4 +309,24 @@ table tr:last-child td {
   table {
     min-width:200px;
   }
+}
+
+*::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height:6px;
+  background-color: rgba(255,255,255,0.2);
+  transition: all ease 0.3s;
+}
+*::-webkit-scrollbar:hover {
+  background-color: rgba(255,255,255,0.3);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.4);
+  transition: all ease 0.3s;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0,0,0,0.5);
 }

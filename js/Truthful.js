@@ -1,7 +1,7 @@
 //Module for input checking and parsing
 var Truthful = (function(isNode) {
 
-  if (isNode) _ = require("../bower_components/lodash/lodash.min.js");
+  if (isNode) _ = require("lodash");
 
   var t = {
     tokens: [/^\(/, /^\)/],
@@ -176,7 +176,22 @@ var Truthful = (function(isNode) {
       return table;
     },
     george: function() {
-
+      var T = "T";
+      var F = "F";
+      var firstResult = this.variables.length;
+      var header = this.variables.concat(this.expressions.map(function(expr) {
+        return expr.name;
+      }));
+      var maxLengths = header.map(function(label) {
+        return Math.max(label.length, T.length, F.length) + 2;
+      });
+      return [header].concat(this.table()).map(function(row, n) {
+        var values = row.map(function(cell, index) {
+          if (n == 0) return _.pad(cell, maxLengths[index]);
+          return _.pad((cell ? T : F), maxLengths[index]);
+        });
+        return values.slice(0, firstResult).join("|") + "||" + values.slice(firstResult).join("|");
+      }).join("\n");
     }
   };
 

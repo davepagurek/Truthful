@@ -24,7 +24,7 @@
         <div id="ui">
           <h1>Truthful</h1>
           <div id="function">
-            <input type="text" value="p: a => !(b|c|a), q: a <=> b" id="input" />
+            <input type="text" value="a => !(b|c|a), thing: a <=> b" id="input" />
             <button id="calculate">&#9654;</button>
           </div>
           <p>Enter a boolean expression using <strong>&amp;, |, =&gt;, &lt;=&gt;,</strong> and <strong>!</strong>. Use brackets where needed.</p>
@@ -34,8 +34,14 @@
           By Dave Pagurek. <a id="github" href="https://github.com/davepagurek/Truthful">View source on GitHub.</a>
         </div>
       </div>
+      <div id="george_container">
+        <pre id="george_result"></pre>
+        <button id="hide_george">Hide</button>
+      </div>
       <div id="wrapper">
-        <div id="result"></div>
+        <div id="result">
+          <button id="george">Export ASCII</button>
+        </div>
       </div>
     </div>
 

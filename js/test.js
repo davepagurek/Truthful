@@ -99,6 +99,16 @@ describe("Truthful", function() {
         ]
       );
     });
+    it("Should be able to generate George-style ASCII tables", function() {
+      assert.equal(
+        Truthful.truthTable("a|b").george(),
+        " a | b || a|b \n" +
+        " T | T ||  T  \n" +
+        " T | F ||  T  \n" +
+        " F | T ||  T  \n" +
+        " F | F ||  F  "
+      )
+    })
   });
 
   describe("Invalid input", function() {

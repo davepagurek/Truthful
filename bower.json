@@ -1,0 +1,20 @@
+{
+  "name": "Truthful",
+  "version": "2.0.0",
+  "homepage": "https://github.com/pahgawk/Truthful",
+  "authors": [
+    "Dave Pagurek <dave@davepagurek.com>"
+  ],
+  "main": "index.html",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

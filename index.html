@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html>
+  <head>
 
-<head>
+    <meta charset="UTF-8">
 
-  <meta charset="UTF-8">
+    <title>Truthful</title>
 
-  <title>Truthful</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,300,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="css/style.css" media="screen" type="text/css" />
 
-  <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,300,700' rel='stylesheet' type='text/css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="css/style.css" media="screen" type="text/css" />
+    <script src="bower_components/lodash/lodash.min.js" type="text/javascript"></script>
+    <script src="js/Truthful.js" type="text/javascript"></script>
+    <script src="js/querystring.js" type="text/javascript"></script>
+    <script src="js/index.js" type="text/javascript"></script>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
 
-  <script src="js/Truthful.js" type="text/javascript"></script>
+  <body>
+    <div id="container">
+      <div id="top">
+        <div id="ui">
+          <h1>Truthful</h1>
+          <div id="function">
+            <input type="text" value="p: a => !(b|c|a), q: a <=> b" id="input" />
+            <button id="calculate">&#9654;</button>
+          </div>
+          <p>Enter a boolean expression using <strong>&amp;, |, =&gt;, &lt;=&gt;,</strong> and <strong>!</strong>. Use brackets where needed.</p>
+          <p>To compare multiple functions, separate each with a comma, optionally specifying a <strong>name:</strong> beforehand.</p>
+        </div>
+        <div id="bottom">
+          By Dave Pagurek. <a id="github" href="https://github.com/davepagurek/Truthful">View source on GitHub.</a>
+        </div>
+      </div>
+      <div id="wrapper">
+        <div id="result"></div>
+      </div>
+    </div>
 
-  <script src="js/querystring.js" type="text/javascript"></script>
-
-  <script src="js/index.js" type="text/javascript"></script>
-
-</head>
-
-<body>
-  <div id="top">
-    <h1>Truthful</h1>
-    <h2>Enter a boolean expression. Use * for AND, + for OR, # for XOR, and ! for NOT. !* is NAND, !+ is NOR, and !# is XNOR. Separate multiple expressions with a comma to compare them.</h2>
-  	<div id="function">
-  		<input type="text" value="f=a*b+!(c*d)" id="input" /><input type="button" value="Calculate" id="calculate" />
-  	</div>
-  </div>
-  <div id="wrapper">
-    <div id="result"></div>
-  </div>
-  <a id="github" href="https://github.com/pahgawk/Truthful">Find this on Github!</a>
-
-</body>
+  </body>
 
 </html>

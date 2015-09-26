@@ -1,0 +1,22 @@
+{
+  "name": "truthful",
+  "version": "2.0.0",
+  "description": "<h1>Truthful</h1> Calculate truth tables from a boolean algebraic expressions Live version at http://davepagurek.com/truthful/",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha js/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pahgawk/Truthful.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pahgawk/Truthful/issues"
+  },
+  "homepage": "https://github.com/pahgawk/Truthful#readme",
+  "dependencies": {
+    "mocha": "^2.3.3"
+  }
+}

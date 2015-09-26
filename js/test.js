@@ -4,174 +4,162 @@ var Truthful = require("./Truthful.js");
 describe("Truthful", function() {
   describe("Expression evaluation", function() {
     it("Should understand basic OR", function() {
-      Truthful.createExpression("x|y", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate({x:true, y:true}), true, "t|t");
-        assert.equal(expr.evaluate({x:true, y:false}), true, "t|f");
-        assert.equal(expr.evaluate({x:false, y:true}), true, "f|t");
-        assert.equal(expr.evaluate({x:false, y:false}), false, "f|f");
-      });
+      var expr = Truthful.expression("x|y");
+      assert.equal(expr.evaluate({x:true, y:true}), true, "t|t");
+      assert.equal(expr.evaluate({x:true, y:false}), true, "t|f");
+      assert.equal(expr.evaluate({x:false, y:true}), true, "f|t");
+      assert.equal(expr.evaluate({x:false, y:false}), false, "f|f");
     });
     it("Should understand basic AND", function() {
-      Truthful.createExpression("x&y", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate({x:true, y:true}), true, "t&t");
-        assert.equal(expr.evaluate({x:true, y:false}), false, "t&f");
-        assert.equal(expr.evaluate({x:false, y:true}), false, "f&t");
-        assert.equal(expr.evaluate({x:false, y:false}), false, "f&f");
-      });
+      var expr = Truthful.expression("x&y");
+      assert.equal(expr.evaluate({x:true, y:true}), true, "t&t");
+      assert.equal(expr.evaluate({x:true, y:false}), false, "t&f");
+      assert.equal(expr.evaluate({x:false, y:true}), false, "f&t");
+      assert.equal(expr.evaluate({x:false, y:false}), false, "f&f");
     });
     it("Should understand basic IMPLIES", function() {
-      Truthful.createExpression("x=>y", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate({x:true, y:true}), true, "t=>t");
-        assert.equal(expr.evaluate({x:true, y:false}), false, "t=>f");
-        assert.equal(expr.evaluate({x:false, y:true}), true, "f=>t");
-        assert.equal(expr.evaluate({x:false, y:false}), true, "f=>f");
-      });
+      var expr = Truthful.expression("x=>y");
+      assert.equal(expr.evaluate({x:true, y:true}), true, "t=>t");
+      assert.equal(expr.evaluate({x:true, y:false}), false, "t=>f");
+      assert.equal(expr.evaluate({x:false, y:true}), true, "f=>t");
+      assert.equal(expr.evaluate({x:false, y:false}), true, "f=>f");
     });
     it("Should understand basic IFF", function() {
-      Truthful.createExpression("x<=>y", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate({x:true, y:true}), true, "t<=>t");
-        assert.equal(expr.evaluate({x:true, y:false}), false, "t<=>f");
-        assert.equal(expr.evaluate({x:false, y:true}), false, "f<=>t");
-        assert.equal(expr.evaluate({x:false, y:false}), true, "f<=>f");
-      });
+      var expr = Truthful.expression("x<=>y");
+      assert.equal(expr.evaluate({x:true, y:true}), true, "t<=>t");
+      assert.equal(expr.evaluate({x:true, y:false}), false, "t<=>f");
+      assert.equal(expr.evaluate({x:false, y:true}), false, "f<=>t");
+      assert.equal(expr.evaluate({x:false, y:false}), true, "f<=>f");
     });
     it("Should understand basic NOT", function() {
-      Truthful.createExpression("!x", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate({x:true}), false, "!t");
-        assert.equal(expr.evaluate({x:false}), true, "!f");
-      });
+      var expr = Truthful.expression("!x");
+      assert.equal(expr.evaluate({x:true}), false, "!t");
+      assert.equal(expr.evaluate({x:false}), true, "!f");
     });
     it("Should understand literals", function() {
-      Truthful.createExpression("true", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "t");
-      });
-      Truthful.createExpression("false", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), false, "f");
-      });
+      assert.equal(Truthful.expression("true").evaluate(), true, "t");
+      assert.equal(Truthful.expression("false").evaluate(), false, "f");
     });
     it("Should respect precedence of operators", function() {
-      Truthful.createExpression("!false|true", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "!f|t");
-      });
-      Truthful.createExpression("!(false|true)", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), false, "!(f|t)");
-      });
+      assert.equal(Truthful.expression("!false|true").evaluate(), true, "!f|t");
+      assert.equal(Truthful.expression("!(false|true)").evaluate(), false, "!(f|t)");
     });
     it("Should ignore extra brackets", function() {
-      Truthful.createExpression("true|true", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "t|t");
-      });
-      Truthful.createExpression("true|(true)", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "t|(t)");
-      });
-      Truthful.createExpression("(true|((true)))", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "(t|((t)))");
-      });
+      assert.equal(Truthful.expression("true|true").evaluate(), true, "t|t");
+      assert.equal(Truthful.expression("true|(true)").evaluate(), true, "t|(t)");
+      assert.equal(Truthful.expression("(true|((true)))").evaluate(), true, "(t|((t)))");
     });
     it("Should ignore extra whitespace", function() {
-      Truthful.createExpression("true|true", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "t|t");
-      });
-      Truthful.createExpression("true | true", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "t | t");
-      });
-      Truthful.createExpression("  true  |   true   ", function(err, expr) {
-        if (err) throw err;
-        assert.equal(expr.evaluate(), true, "  t  |   t   ");
-      });
+      assert.equal(Truthful.expression("true|true").evaluate(), true, "t|t");
+      assert.equal(Truthful.expression("true | true").evaluate(), true, "t | t");
+      assert.equal(Truthful.expression("  true  |   true   ").evaluate(), true, "  t  |   t   ");
+    });
+  });
+
+  describe("Expression objects", function() {
+    it("Should be able to produce a string", function() {
+      assert.equal(Truthful.expression("a|b&(!c)").string(), "(a|(b&(!c)))");
+      assert.equal(Truthful.expression("a | b & ( ! c )").string(), "(a|(b&(!c)))");
+    });
+    it("Should be able to produce a set of variables", function() {
+      assert.equal(
+        JSON.stringify(Truthful.expression("a|b|c").variables()),
+        JSON.stringify({a:true,b:true,c:true})
+      );
+    });
+  });
+
+  describe("Truth tables", function() {
+    it("Should alphabetize variables", function() {
+      assert.deepEqual(
+        Truthful.truthTable("d|b|a|c").variables,
+        ["a","b","c","d"]
+      );
+    });
+    it("Should parse multiple expressions", function() {
+      assert.deepEqual(
+        Truthful.truthTable("a|b, c|d").expressions.map(function(e) { return e.name }).sort(),
+        ["a|b", "c|d"]
+      );
+    });
+    it("Should parse named expressions", function() {
+      assert.deepEqual(
+        Truthful.truthTable("a|b, test1:a&b, test2:a=>b").expressions.map(function(e) { return e.name }).sort(),
+        ["a|b", "test1", "test2"]
+      );
+    });
+    it("Should produce valid tables", function() {
+      assert.deepEqual(
+        Truthful.truthTable("a&b").table(),
+        [
+          [true, true, true],
+          [true, false, false],
+          [false, true, false],
+          [false, false, false]
+        ]
+      );
     });
   });
 
   describe("Invalid input", function() {
     it("Should catch improperly nested brackets", function() {
-      Truthful.createExpression("(true))", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Improperly nested brackets: )");
-      });
-      Truthful.createExpression("((true)", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Improperly nested brackets: (true");
-      });
+      assert.throws(function() {
+        Truthful.expression("(true))");
+      }, "Improperly nested brackets: )");
+      assert.throws(function() {
+        Truthful.expression("((true)");
+      }, "Improperly nested brackets: (true");
     });
     it("Should catch invalid tokens", function() {
-      Truthful.createExpression("true$false", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Couldn't match token: $false");
-      });
+      assert.throws(function() {
+        Truthful.expression("true$false");
+      }, "Couldn't match token: $false");
     });
     it("Should catch no input", function() {
-      Truthful.createExpression("", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "No tokens found in input");
-      });
-      Truthful.createExpression("   ", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "No tokens found in input");
-      });
+      assert.throws(function() {
+        Truthful.expression("");
+      }, "No tokens found in input");
+      assert.throws(function() {
+        Truthful.expression("   ");
+      }, "No tokens found in input");
     });
     it("Should validate tokens used", function() {
-      Truthful.createExpression("|", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token |: |");
-      });
-      Truthful.createExpression("|b", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token |: |b");
-      });
-      Truthful.createExpression("b|", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token |: b|");
-      });
-      Truthful.createExpression("&", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token &: &");
-      });
-      Truthful.createExpression("&b", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token &: &b");
-      });
-      Truthful.createExpression("b&", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token &: b&");
-      });
-      Truthful.createExpression("=>", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token =>: =>");
-      });
-      Truthful.createExpression("=>b", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token =>: =>b");
-      });
-      Truthful.createExpression("b=>", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token =>: b=>");
-      });
-      Truthful.createExpression("<=>", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token <=>: <=>");
-      });
-      Truthful.createExpression("<=>b", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token <=>: <=>b");
-      });
-      Truthful.createExpression("b<=>", function(err, expr) {
-        assert.ok(err);
-        assert.equal(err.message, "Invalid syntax for token <=>: b<=>");
-      });
-    })
+      assert.throws(function() {
+        Truthful.expression("|");
+      }, "Invalid syntax for token |: |");
+      assert.throws(function() {
+        Truthful.expression("|b");
+      }, "Invalid syntax for token |: |b");
+      assert.throws(function() {
+        Truthful.expression("b|");
+      }, "Invalid syntax for token |: b|");
+      assert.throws(function() {
+        Truthful.expression("&");
+      }, "Invalid syntax for token &: &");
+      assert.throws(function() {
+        Truthful.expression("&b");
+      }, "Invalid syntax for token &: &b");
+      assert.throws(function() {
+        Truthful.expression("b&");
+      }, "Invalid syntax for token &: b&");
+      assert.throws(function() {
+        Truthful.expression("=>");
+      }, "Invalid syntax for token =>: =>");
+      assert.throws(function() {
+        Truthful.expression("=>b");
+      }, "Invalid syntax for token =>: =>b");
+      assert.throws(function() {
+        Truthful.expression("b=>");
+      }, "Invalid syntax for token =>: b=>");
+      assert.throws(function() {
+        Truthful.expression("<=>");
+      }, "Invalid syntax for token <=>: <=>");
+      assert.throws(function() {
+        Truthful.expression("<=>b");
+      }, "Invalid syntax for token <=>: <=>b");
+      assert.throws(function() {
+        Truthful.expression("b<=>");
+      }, "Invalid syntax for token <=>: b<=>");
+    });
   });
 });

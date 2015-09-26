@@ -98,4 +98,5 @@ If there is an error with user input, Truthful will throw a `new Error()` with a
 - Add tests for new features
 - Run tests with `npm test`
 - Create a pull request
+
 For more details: https://guides.github.com/activities/contributing-to-open-source/#contributing

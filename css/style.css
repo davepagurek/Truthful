@@ -24,6 +24,8 @@ body {
   -webkit-align-items: stretch;
   -ms-flex-align: stretch;
   align-items: stretch;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 a {
   color:#FFF;
@@ -48,24 +50,6 @@ a {
   -ms-flex: 1;
   flex: 1;
   padding:20px;
-}
-#wrapper {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-  overflow-y:auto;
-  overflow-x:auto;
-  background-color:#524656;
-  transition: all 0.3s ease;
-}
-#wrapper.covered {
-  width:0;
-  overflow-x: hidden;
-  -webkit-box-flex: 0;
-  -webkit-flex: 0;
-  -ms-flex: 0;
-  flex: 0;
 }
 h1 {
   font-family: 'Open Sans', sans-serif;
@@ -172,26 +156,31 @@ input[type="text"]:focus {
   transform: scaleY(1);
 }
 #george_container {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
   padding: 20px 0;
   text-align:center;
   width: 0;
   background-color:#333745;
-  -webkit-box-flex: 0;
-  -webkit-flex: 0;
-  -ms-flex: 0;
-  flex: 0;
   overflow-y:auto;
   overflow-x:hidden;
+  -webkit-transition: all 0.4s ease;
   transition: all 0.4s ease;
+  -webkit-box-flex: 0.00001;
+  -webkit-flex-grow: 0.00001;
+  -ms-flex-positive: 0.00001;
+  flex-grow: 0.00001;
 }
 #george_container.open {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  padding: 20px;
-  flex: 1;
   width:auto;
   overflow-x:auto;
+  padding: 20px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
 }
 #george_container pre {
   display:inline-block;
@@ -205,6 +194,29 @@ input[type="text"]:focus {
   font-size: 13px;
   width:auto;
   height:auto;
+}
+#wrapper {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  overflow-y:auto;
+  overflow-x:auto;
+  background-color:#524656;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+#wrapper.covered {
+  -webkit-box-flex: 0.00001;
+  -webkit-flex-grow: 0.00001;
+  -ms-flex-positive: 0.00001;
+  flex-grow: 0.00001;
+  width:0;
+  overflow-x: hidden;
+  -webkit-box-flex: 0.00001;
+  -webkit-flex-grow: 0.00001;
+  -ms-flex-positive: 0.00001;
+  flex-grow: 0.00001;
 }
 
 
@@ -318,6 +330,7 @@ table tr:last-child td {
   width: 6px;
   height:6px;
   background-color: rgba(255,255,255,0.2);
+  -webkit-transition: all ease 0.3s;
   transition: all ease 0.3s;
 }
 *::-webkit-scrollbar:hover {
@@ -325,6 +338,7 @@ table tr:last-child td {
 }
 *::-webkit-scrollbar-thumb {
   background-color: rgba(0,0,0,0.4);
+  -webkit-transition: all ease 0.3s;
   transition: all ease 0.3s;
 }
 *::-webkit-scrollbar-thumb:hover {

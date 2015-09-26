@@ -1,37 +1,7 @@
-function hide(element) {
-  element.style.overflow = "hidden";
-  element.style.height = getComputedStyle(element).height;
-  element.style.transition = 'all .5s ease';
-  element.offsetHeight = "" + element.offsetHeight; // force repaint
-  element.style.height = '0';
-  element.style.marginTop = "0";
-  element.style.marginBottom = "0";
-}
-function show(element) {
-  var prevHeight = element.style.height;
-  element.style.height = 'auto';
-  var endHeight = getComputedStyle(element).height;
-  element.style.height = prevHeight;
-  element.offsetHeight = "" + element.offsetHeight; // force repaint
-  element.style.transition = 'all .5s ease';
-  element.style.height = endHeight;
-  element.style.marginTop = "";
-  element.style.marginBottom = "";
-  element.addEventListener('transitionend', function transitionEnd(event) {
-    if (event.propertyName == 'height' && this.style.height == endHeight) {
-      this.style.transition = '';
-      this.style.height = 'auto';
-      this.style.overflow = "visible";
-    }
-    this.removeEventListener('transitionend', transitionEnd, false);
-  }, false);
-}
-
 window.onload = function() {
   var calculateBtn = document.getElementById("calculate");
   var input = document.getElementById("input");
   var result = document.getElementById("result");
-  var wrapper = document.getElementById("wrapper");
 
   var initial = input.value;
 
@@ -40,7 +10,7 @@ window.onload = function() {
   if (q.value("input")) input.value = q.value("input");
 
   function calculate() {
-    hide(wrapper);
+    result.classList.remove("open");
 
     var timer = setTimeout(function() {
       result.innerHTML = "";
@@ -52,7 +22,7 @@ window.onload = function() {
         errors.innerHTML = err.message;
         result.appendChild(errors);
       }
-      show(wrapper);
+      result.classList.add("open");
     }, 800);
 
   };

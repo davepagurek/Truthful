@@ -148,12 +148,13 @@ var Truthful = (function(isNode) {
       F = F || "F";
 
       if (isNode) throw new Error("HTML tables can only be made in the browser!");
+      var firstResult = this.variables.length;
       var table = document.createElement("table");
 
       var header = document.createElement("tr");
       this.variables.concat(this.expressions.map(function(expr) {
         return expr.name;
-      })).forEach(function(variable) {
+      })).forEach(function(variable, index) {
         var cell = document.createElement("th");
         cell.innerHTML = variable;
         header.appendChild(cell);
@@ -162,9 +163,10 @@ var Truthful = (function(isNode) {
 
       this.table().forEach(function(row) {
         var rowElem = document.createElement("tr");
-        row.forEach(function(col) {
+        row.forEach(function(col, index) {
           var cell = document.createElement("td");
-          cell.className = col ? "truthful-true" : "truthful-false";
+          if (index == firstResult) cell.classList.add("truthful-first");
+          cell.classList.add(col ? "truthful-true" : "truthful-false");
           cell.innerHTML = col ? T : F;
           rowElem.appendChild(cell);
         });

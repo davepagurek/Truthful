@@ -41,8 +41,9 @@ describe("Truthful", function() {
       assert.equal(Truthful.expression("false").evaluate(), false, "f");
     });
     it("Should respect precedence of operators", function() {
-      assert.equal(Truthful.expression("!false|true").evaluate(), true, "!f|t");
-      assert.equal(Truthful.expression("!(false|true)").evaluate(), false, "!(f|t)");
+      assert.equal(Truthful.expression("!a|b").string(), "((!a)|b)", "!f|t");
+      assert.equal(Truthful.expression("!(a|b)").string(), "(!(a|b))", "!(f|t)");
+      assert.equal(Truthful.expression("(a | b) & (c => a)").string(), "((a|b)&(c=>a))");
     });
     it("Should ignore extra brackets", function() {
       assert.equal(Truthful.expression("true|true").evaluate(), true, "t|t");

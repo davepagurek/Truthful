@@ -4,12 +4,12 @@ var Truthful = (function(isNode) {
   if (isNode) _ = require("lodash");
 
   var t = {
-    tokens: [/^\(/, /^\)/],
+    tokens: [],
     translators: {},
     variables: {},
     validators: {},
-    openBracket: "(",
-    closeBracket: ")"
+    openBracket: /^\(/,
+    closeBracket: /^\)/
   };
 
   function Expression(token, literal, prev, next) {
@@ -56,15 +56,16 @@ var Truthful = (function(isNode) {
     var openBrackets = 0;
     for (var i = 0; i < tokenInput.length; i++) {
       if (tokenInput[i].match(token) && openBrackets == 0) return i;
-      if (tokenInput[i] == t.openBracket) openBrackets++;
-      if (tokenInput[i] == t.closeBracket) openBrackets--;
+      if (tokenInput[i].match(t.openBracket)) openBrackets++;
+      if (tokenInput[i].match(t.closeBracket)) openBrackets--;
     }
     return -1;
   };
 
   t.firstMatch = function(input) {
-    for (var i = 0; i < t.tokens.length; i++) {
-      var result = input.match(t.tokens[i]);
+    var tokens = [t.openBracket, t.closeBracket].concat(t.tokens);
+    for (var i = 0; i < tokens.length; i++) {
+      var result = input.match(tokens[i]);
       if (result) return result[0];
     }
     return null;
@@ -88,21 +89,16 @@ var Truthful = (function(isNode) {
   t.parse = function(tokenInput) {
     if (!tokenInput || tokenInput.length == 0) return new Expression();
 
-    if (tokenInput[0] == t.openBracket) {
-      if (tokenInput[tokenInput.length-1] == t.closeBracket) {
-        return t.parse(tokenInput.slice(1, -1));
-      } else {
-        throw new Error("Improperly nested brackets: " + tokenInput.join(""));
-      }
+    if (tokenInput[0].match(t.openBracket) && t.findIndex(tokenInput.slice(1), t.closeBracket) == tokenInput.length-2) {
+      return t.parse(tokenInput.slice(1, -1));
     }
-    if (tokenInput[0] == t.closeBracket) throw new Error("Improperly nested brackets: " + tokenInput.join(""));
+    if (tokenInput[0].match(t.closeBracket)) throw new Error("Improperly nested brackets: " + tokenInput.join(""));
 
     var tokens = t.tokens.slice();
     while (tokens.length > 0) {
       var token = tokens.pop();
       var tokenLocation = t.findIndex(tokenInput, token);
       if (tokenLocation != -1) {
-
         var prev = t.parse(tokenInput.slice(0, tokenLocation));
         var next = t.parse(tokenInput.slice(tokenLocation+1));
         var expr = new Expression(token, tokenInput[tokenLocation], prev, next);

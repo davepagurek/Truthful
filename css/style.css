@@ -95,8 +95,9 @@ button, a.button {
   transition: all 0.3s ease;
   cursor:pointer;
 }
-button:hover, a.button:hover {
+button:hover, a.button:hover, button:focus, a.button:focus {
   background-color:#B8D6DF;
+  outline: 0;
 }
 #top button, #top a.button {
   border-radius:0 5px 5px 0;
@@ -141,19 +142,12 @@ input[type="text"]:focus {
   padding: 20px;
   text-align:center;
   height:auto;
-  -webkit-transform: scaleY(0);
-  -ms-transform: scaleY(0);
-  transform: scaleY(0);
-  -webkit-transform-origin: top center;
-  -ms-transform-origin: top center;
-  transform-origin: top center;
-  -webkit-transition: all 0.4s ease;
-  transition: all 0.4s ease;
+  opacity:0;
+  -webkit-transition: all 0.4s linear;
+  transition: all 0.4s linear;
 }
 #result.open {
-  -webkit-transform: scaleY(1);
-  -ms-transform: scaleY(1);
-  transform: scaleY(1);
+  opacity:1;
 }
 #george_container {
   -webkit-box-flex: 1;

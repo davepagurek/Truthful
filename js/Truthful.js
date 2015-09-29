@@ -3,22 +3,51 @@ var Truthful = (function(isNode) {
 
   if (isNode) _ = require("lodash");
 
-  var t = {
-    tokens: [],
-    translators: {},
-    variables: {},
-    validators: {},
-    openBracket: /^\(/,
-    closeBracket: /^\)/
+  // Object to store public methods
+  var exports = {};
+
+  // Object to store internal properties and methods
+  var internal = {}
+
+  /*
+   * Base classes
+   */
+
+  // Description of a valid syntactic unit of a boolean expression
+  function Token(options) {
+    if (!options) throw new Error("Token options must be specified!");
+    if (!options.pattern) throw new Error("Token options.pattern must be specified!");
+
+    this.pattern = new RegExp("^" + options.pattern.source);
+    this._evaluate = options.evaluate;
+    this._validate = options.validate;
+    this.variable = !!options.variable;
+  }
+  Token.prototype = {
+    match: function(str) {
+      var result = str.match(this.pattern);
+      return result ? result[0] : null;
+    },
+    evaluate: function(expr, vars) {
+      if (!this._evaluate) throw new Error("No evaluate function specified!");
+      return this._evaluate.bind(expr)(vars);
+    },
+    validate: function(expr) {
+      return this._validate ? this._validate.bind(expr)() : true;
+    }
   };
 
-  function Expression(token, literal, prev, next) {
-    this.token = token;
-    this.literal = literal;
-    this.prev = prev;
-    this.next = next;
+  // An instance of a Boolean expression as a token
+  function Expression(options) {
+    options = options || {};
+    this.token = options.token;
+    this.literal = options.literal;
+    this.prev = options.prev;
+    this.next = options.next;
+    if (!this.validate()) {
+      throw new Error("Invalid syntax for token " + this.literal + ": " + this.string());
+    }
   }
-
   Expression.prototype = {
     empty: function() {
       return !this.token;
@@ -26,7 +55,7 @@ var Truthful = (function(isNode) {
     variables: function() {
       if (this.empty()) return {};
       var set = _.extend({}, this.prev.variables(), this.next.variables());
-      if (t.variables[this.token]) set[this.literal] = true;
+      if (this.token.variable) set[this.literal] = true;
       return set;
     },
     string: function() {
@@ -39,79 +68,14 @@ var Truthful = (function(isNode) {
     },
     evaluate: function(vars) {
       vars = vars || {};
-      if (t.translators[this.token]) return t.translators[this.token].bind(this)(this.prev, this.next, vars);
-      return false;
+      return this.token ? this.token.evaluate(this, vars) : false;
+    },
+    validate: function() {
+      return this.token ? this.token.validate(this) : true;
     }
   };
 
-  t.addToken = function(pattern, validate, evaluate, variable) {
-    pattern = new RegExp("^" + pattern.source);
-    t.tokens.push(pattern);
-    t.translators[pattern] = evaluate;
-    t.validators[pattern] = validate;
-    t.variables[pattern] = !!variable;
-  };
-
-  t.findIndex = function(tokenInput, token) {
-    var openBrackets = 0;
-    for (var i = 0; i < tokenInput.length; i++) {
-      if (tokenInput[i].match(token) && openBrackets == 0) return i;
-      if (tokenInput[i].match(t.openBracket)) openBrackets++;
-      if (tokenInput[i].match(t.closeBracket)) openBrackets--;
-    }
-    return -1;
-  };
-
-  t.firstMatch = function(input) {
-    var tokens = [t.openBracket, t.closeBracket].concat(t.tokens);
-    for (var i = 0; i < tokens.length; i++) {
-      var result = input.match(tokens[i]);
-      if (result) return result[0];
-    }
-    return null;
-  };
-
-  t.expression = function(input) {
-    input = input.replace(/\s+/g, "");
-    if (input.length == 0) throw new Error("No tokens found in input");
-
-    var tokenInput = [];
-    while (input.length>0) {
-      var result = t.firstMatch(input);
-      if (!result) throw new Error("Couldn't match token: " + input);
-      tokenInput.push(result);
-      input = input.substr(result.length);
-    }
-
-    return t.parse(tokenInput);
-  };
-
-  t.parse = function(tokenInput) {
-    if (!tokenInput || tokenInput.length == 0) return new Expression();
-
-    if (tokenInput[0].match(t.openBracket) && t.findIndex(tokenInput.slice(1), t.closeBracket) == tokenInput.length-2) {
-      return t.parse(tokenInput.slice(1, -1));
-    }
-    if (tokenInput[0].match(t.closeBracket)) throw new Error("Improperly nested brackets: " + tokenInput.join(""));
-
-    var tokens = t.tokens.slice();
-    while (tokens.length > 0) {
-      var token = tokens.pop();
-      var tokenLocation = t.findIndex(tokenInput, token);
-      if (tokenLocation != -1) {
-        var prev = t.parse(tokenInput.slice(0, tokenLocation));
-        var next = t.parse(tokenInput.slice(tokenLocation+1));
-        var expr = new Expression(token, tokenInput[tokenLocation], prev, next);
-        if (t.validators[token] && !t.validators[token](prev, next)) {
-          throw new Error("Invalid syntax for token " + tokenInput[tokenLocation] + ": " + expr.string());
-        }
-        return expr;
-      }
-    }
-
-    throw new Error("Extra tokens left unparsed: " + tokens.join(", "));
-  };
-
+  // An instance of a truth table, potentially with multiple Boolean expression columns
   function Table(variables, expressions) {
     this.variables = variables;
     this.expressions = expressions;
@@ -132,7 +96,6 @@ var Truthful = (function(isNode) {
     });
     this.results = results;
   }
-
   Table.prototype = {
     table: function() {
       // Transpose matrix
@@ -191,19 +154,42 @@ var Truthful = (function(isNode) {
     }
   };
 
-  t.truthTable = function(input) {
+
+  /*
+   * Public interface
+   */
+
+  // Generates an Expression object from a Boolean expression string
+  exports.expression = function(input) {
+    input = input.replace(/\s+/g, ""); // Ignore whitespace
+    if (input.length == 0) throw new Error("No tokens found in input");
+
+    var tokenInput = [];
+    while (input.length>0) {
+      var result = internal.firstMatch(input);
+      if (!result) throw new Error("Couldn't match token: " + input);
+      tokenInput.push(result);
+      input = input.substr(result.length);
+    }
+
+    return internal.parse(tokenInput);
+  };
+
+  // Generates a Table object from a string input of comma-separated
+  // Boolean expressions, optionally prefaced with a `name:` label
+  exports.truthTable = function(input) {
     var err = null;
     var expressions = input.split(/,\s*/).map(function(element) {
       var match =  /^\s*(.+)\s*:(.+)$/.exec(element); // Get function name if it exists
       if (match) {
         return {
           name: match[1],
-          expression: t.expression(match[2])
+          expression: exports.expression(match[2])
         };
       } else {
         return {
           name: element,
-          expression: t.expression(element)
+          expression: exports.expression(element)
         };
       }
     });
@@ -218,18 +204,110 @@ var Truthful = (function(isNode) {
   };
 
 
-  if (isNode) module.exports = t;
+  /*
+   * Helpers
+   */
 
-  return t;
-})(typeof window === "undefined");
+  // Finds the first index of a token in an input array
+  // where the token is not nested in brackets
+  internal.indexOutsideBrackets = function(tokenInput, token) {
+    var openBrackets = 0;
+    for (var i = 0; i < tokenInput.length; i++) {
+      if (token.match(tokenInput[i]) && openBrackets == 0) return i;
+      if (internal.openBracket.match(tokenInput[i])) openBrackets++;
+      if (internal.closeBracket.match(tokenInput[i])) openBrackets--;
+    }
+    return -1;
+  };
 
+  // Returns the literal of the first matching token in the
+  // input, giving precedence to tokens added earlier
+  internal.firstMatch = function(input) {
+    var tokens = [internal.openBracket, internal.closeBracket].concat(internal.tokens);
+    for (var i = 0; i < tokens.length; i++) {
+      var result = tokens[i].match(input);
+      if (result) return result;
+    }
+    return null;
+  };
 
-Truthful.addToken(/\w+/, null, function(prev, next, vars) { return vars[this.literal] || false }, true);
-Truthful.addToken(/true/, null, function(){ return true });
-Truthful.addToken(/false/, null, function(){ return false });
-Truthful.addToken(/\!/, function(prev, next) { return prev.empty() && !next.empty() }, function(prev, next, vars) { return !next.evaluate(vars) });
-Truthful.addToken(/\&/, function(prev, next) { return !prev.empty() && !next.empty() }, function(prev, next, vars) { return prev.evaluate(vars) && next.evaluate(vars) });
-Truthful.addToken(/\|/, function(prev, next) { return !prev.empty() && !next.empty() }, function(prev, next, vars) { return prev.evaluate(vars) || next.evaluate(vars) });
-Truthful.addToken(/=>/, function(prev, next) { return !prev.empty() && !next.empty() }, function(prev, next, vars) { return !prev.evaluate(vars) || next.evaluate(vars) });
-Truthful.addToken(/<=>/, function(prev, next) { return !prev.empty() && !next.empty() }, function(prev, next, vars) { return !((prev.evaluate(vars) && !next.evaluate(vars)) || (!prev.evaluate(vars) && next.evaluate(vars))) });
+  // Parses an array of token strings into a binary expression tree
+  internal.parse = function(tokenInput) {
+    if (!tokenInput || tokenInput.length == 0) return new Expression();
 
+    if (internal.openBracket.match(tokenInput[0]) && internal.indexOutsideBrackets(tokenInput.slice(1), internal.closeBracket) == tokenInput.length-2) {
+      return internal.parse(tokenInput.slice(1, -1));
+    }
+    if (internal.closeBracket.match(tokenInput[0])) throw new Error("Improperly nested brackets: " + tokenInput.join(""));
+
+    var tokens = internal.tokens.slice(); // Make copy of tokens to go through
+    while (tokens.length > 0) {
+      var token = tokens.pop();
+      var tokenLocation = internal.indexOutsideBrackets(tokenInput, token);
+      if (tokenLocation != -1) {
+        var prev = internal.parse(tokenInput.slice(0, tokenLocation));
+        var next = internal.parse(tokenInput.slice(tokenLocation+1));
+        return new Expression({
+          token: token,
+          literal: tokenInput[tokenLocation],
+          prev: prev,
+          next: next
+        });
+      }
+    }
+
+    throw new Error("Extra tokens left unparsed: " + tokens.join(", "));
+  };
+
+  /*
+   * Language syntax definitions
+   */
+
+  internal.openBracket = new Token({pattern: /\(/});
+  internal.closeBracket = new Token({pattern: /\)/});
+
+  internal.tokens = [
+    new Token({
+      pattern: /\w+/,
+      evaluate: function(vars) { return vars[this.literal] || false },
+      variable: true
+    }),
+    new Token({
+      pattern: /true/,
+      evaluate: function() { return true }
+    }),
+    new Token({
+      pattern: /false/,
+      evaluate: function() { return false }
+    }),
+    new Token({
+      pattern: /!/,
+      validate: function() { return this.prev.empty() && !this.next.empty() },
+      evaluate: function(vars) { return !this.next.evaluate(vars) }
+    }),
+    new Token({
+      pattern: /&/,
+      validate: function() { return !this.prev.empty() && !this.next.empty() },
+      evaluate: function(vars) { return this.prev.evaluate(vars) && this.next.evaluate(vars) }
+    }),
+    new Token({
+      pattern: /\|/,
+      validate: function() { return !this.prev.empty() && !this.next.empty() },
+      evaluate: function(vars) { return this.prev.evaluate(vars) || this.next.evaluate(vars) }
+    }),
+    new Token({
+      pattern: /=>/,
+      validate: function() { return !this.prev.empty() && !this.next.empty() },
+      evaluate: function(vars) { return !this.prev.evaluate(vars) || this.next.evaluate(vars) }
+    }),
+    new Token({
+      pattern: /<=>/,
+      validate: function() { return !this.prev.empty() && !this.next.empty() },
+      evaluate: function(vars) { return !((this.prev.evaluate(vars) && !this.next.evaluate(vars)) || (!this.prev.evaluate(vars) && this.next.evaluate(vars))) }
+    })
+  ];
+
+  if (isNode) module.exports = exports;
+
+  return exports;
+})(typeof window === "undefined"); // Check if running in Node or not using the presence of `window`

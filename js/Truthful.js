@@ -58,13 +58,19 @@ var Truthful = (function(isNode) {
       if (this.token.variable) set[this.literal] = true;
       return set;
     },
-    string: function() {
-      var prev = this.prev ? this.prev.string() : "";
-      var next = this.next ? this.next.string() : "";
+    _string: function() {
+      var prev = (this.prev && !this.prev.empty()) ?
+        this.prev._string() : "";
+      var next = (this.next && !this.next.empty()) ?
+        this.next._string() : "";
       var current = this.empty() ? "" : this.literal;
+
       var str = prev + current + next;
       if (prev != "" || next != "") return "(" + str + ")";
       return str;
+    },
+    string: function() {
+      return this._string().slice(1,-1);
     },
     evaluate: function(vars) {
       vars = vars || {};

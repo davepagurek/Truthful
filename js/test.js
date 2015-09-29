@@ -40,10 +40,11 @@ describe("Truthful", function() {
       assert.equal(Truthful.expression("true").evaluate(), true, "t");
       assert.equal(Truthful.expression("false").evaluate(), false, "f");
     });
-    it("Should respect precedence of operators", function() {
-      assert.equal(Truthful.expression("!a|b").string(), "((!a)|b)", "!f|t");
-      assert.equal(Truthful.expression("!(a|b)").string(), "(!(a|b))", "!(f|t)");
-      assert.equal(Truthful.expression("(a | b) & (c => a)").string(), "((a|b)&(c=>a))");
+    it("Should respect precedence of operators, right-associative", function() {
+      assert.equal(Truthful.expression("!a|b").string(), "(!a)|b");
+      assert.equal(Truthful.expression("!(a|b)").string(), "!(a|b)");
+      assert.equal(Truthful.expression("(a | b) & (c => a)").string(), "(a|b)&(c=>a)");
+      assert.equal(Truthful.expression("a=>b=>c").string(), "a=>(b=>c)");
     });
     it("Should ignore extra brackets", function() {
       assert.equal(Truthful.expression("true|true").evaluate(), true, "t|t");
@@ -59,8 +60,8 @@ describe("Truthful", function() {
 
   describe("Expression objects", function() {
     it("Should be able to produce a string", function() {
-      assert.equal(Truthful.expression("a|b&(!c)").string(), "(a|(b&(!c)))");
-      assert.equal(Truthful.expression("a | b & ( ! c )").string(), "(a|(b&(!c)))");
+      assert.equal(Truthful.expression("a|b&(!c)").string(), "a|(b&(!c))");
+      assert.equal(Truthful.expression("a | b & ( ! c )").string(), "a|(b&(!c))");
     });
     it("Should be able to produce a set of variables", function() {
       assert.equal(

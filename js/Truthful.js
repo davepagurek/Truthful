@@ -78,6 +78,13 @@ var Truthful = (function(isNode) {
     },
     validate: function() {
       return this.token ? this.token.validate(this) : true;
+    },
+    setLabel: function(label) {
+      this._label = label;
+      return this;
+    },
+    label: function() {
+      return this._label || this.string();
     }
   };
 
@@ -93,7 +100,7 @@ var Truthful = (function(isNode) {
     this.combinations = combinations;
     var results = expressions.map(function(expression, col) {
       return _.range(Math.pow(2, variables.length)).map(function(cell, row) {
-        return expression.expression.evaluate(
+        return expression.evaluate(
           _.object(combinations.map(function(cells, varNum) {
             return [variables[varNum], cells[row]];
           }))
@@ -118,7 +125,7 @@ var Truthful = (function(isNode) {
 
       var header = document.createElement("tr");
       this.variables.concat(this.expressions.map(function(expr) {
-        return expr.name;
+        return expr.label();
       })).forEach(function(variable, index) {
         var cell = document.createElement("th");
         cell.innerHTML = variable;
@@ -145,7 +152,7 @@ var Truthful = (function(isNode) {
       var F = "F";
       var firstResult = this.variables.length;
       var header = this.variables.concat(this.expressions.map(function(expr) {
-        return expr.name;
+        return expr.label();
       }));
       var maxLengths = header.map(function(label) {
         return Math.max(label.length, T.length, F.length) + 2;
@@ -167,7 +174,15 @@ var Truthful = (function(isNode) {
 
   // Generates an Expression object from a Boolean expression string
   exports.expression = function(input) {
+    var label = input;
     input = input.replace(/\s+/g, ""); // Ignore whitespace
+
+    var result =  /^(.+)*:(.+)$/.exec(input); // Get function label if it exists
+    if (result) {
+      label = result[1];
+      input = result[2];
+    }
+
     if (input.length == 0) throw new Error("No tokens found in input");
 
     var tokenInput = [];
@@ -178,7 +193,7 @@ var Truthful = (function(isNode) {
       input = input.substr(result.length);
     }
 
-    return internal.parse(tokenInput);
+    return internal.parse(tokenInput).setLabel(label);
   };
 
   // Generates a Table object from a string input of comma-separated
@@ -186,22 +201,11 @@ var Truthful = (function(isNode) {
   exports.truthTable = function(input) {
     var err = null;
     var expressions = input.split(/,\s*/).map(function(element) {
-      var match =  /^\s*(.+)\s*:(.+)$/.exec(element); // Get function name if it exists
-      if (match) {
-        return {
-          name: match[1],
-          expression: exports.expression(match[2])
-        };
-      } else {
-        return {
-          name: element,
-          expression: exports.expression(element)
-        };
-      }
+      return exports.expression(element);
     });
 
     var variables = Object.keys(_.reduce(
-      expressions.map(function(expr) { return expr.expression.variables() }),
+      expressions.map(function(expr) { return expr.variables() }),
       function(set, vars) { return _.merge(set, vars) },
       {}
     )).sort();

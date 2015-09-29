@@ -80,13 +80,13 @@ describe("Truthful", function() {
     });
     it("Should parse multiple expressions", function() {
       assert.deepEqual(
-        Truthful.truthTable("a|b, c|d").expressions.map(function(e) { return e.name }).sort(),
+        Truthful.truthTable("a|b, c|d").expressions.map(function(e) { return e.label() }).sort(),
         ["a|b", "c|d"]
       );
     });
     it("Should parse named expressions", function() {
       assert.deepEqual(
-        Truthful.truthTable("a|b, test1:a&b, test2:a=>b").expressions.map(function(e) { return e.name }).sort(),
+        Truthful.truthTable("a|b, test1:a&b, test2:a=>b").expressions.map(function(e) { return e.label() }).sort(),
         ["a|b", "test1", "test2"]
       );
     });

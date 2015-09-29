@@ -74,6 +74,7 @@ p {
   padding:10px;
 }
 p strong {
+  font-weight:normal;
   font-family:monospace;
 }
 button, a.button {
@@ -235,9 +236,9 @@ table tr:first-child:hover {
 }
 table tr th {
   border-bottom: 2px solid #FFF;
-}
-table tr th {
   padding:10px;
+  font-family: monospace;
+  font-weight: normal;
 }
 table tr td {
   margin:0;

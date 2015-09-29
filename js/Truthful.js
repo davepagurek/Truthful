@@ -124,11 +124,10 @@ var Truthful = (function(isNode) {
       var table = document.createElement("table");
 
       var header = document.createElement("tr");
-      this.variables.concat(this.expressions.map(function(expr) {
-        return expr.label();
-      })).forEach(function(variable, index) {
+      this.variables.concat(this.expressions).forEach(function(item, index) {
         var cell = document.createElement("th");
-        cell.innerHTML = variable;
+        cell.innerHTML = item.label ? item.label() : item;
+        if (item.string) cell.setAttribute("data-expression", item.string());
         header.appendChild(cell);
       });
       table.appendChild(header);

@@ -15,6 +15,25 @@ window.onload = function() {
   var q = new QueryString();
   if (q.value("input")) input.value = q.value("input");
 
+  function toggleExplicit(event) {
+    event.preventDefault();
+    var expression = this.getAttribute("data-expression");
+    if (expression) {
+      this.setAttribute("data-label", this.textContent);
+      this.removeAttribute("data-expression");
+      this.textContent = expression;
+    } else {
+      var label = this.getAttribute("data-label");
+      this.setAttribute("data-expression", this.textContent);
+      this.removeAttribute("data-label");
+      this.textContent = label;
+    }
+  }
+
+  function preventSelection(event) {
+    event.preventDefault();
+  }
+
   function calculate() {
     result.classList.remove("open");
     wrapper.classList.remove("covered");
@@ -25,12 +44,21 @@ window.onload = function() {
 
       try {
         table = Truthful.truthTable(input.value);
-        result.appendChild(table.html());
+        htmlTable = table.html();
+        _.forEach(
+          htmlTable.querySelectorAll("th[data-expression]"),
+          function(th) {
+            th.addEventListener("click", toggleExplicit);
+            th.addEventListener("mousedown", preventSelection);
+          }
+        );
+        result.appendChild(htmlTable);
         result.appendChild(georgeBtn);
         georgeResult.innerHTML = table.george();
         result.appendChild(georgeBtn);
       } catch (err) {
         var errors = document.createElement("div");
+        errors.className = "errors";
         errors.innerHTML = err.message;
         result.appendChild(errors);
       }

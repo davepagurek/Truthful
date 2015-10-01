@@ -7,7 +7,7 @@ var Truthful = (function(isNode) {
   var exports = {};
 
   // Object to store internal properties and methods
-  var internal = {}
+  var internal = {};
 
   /*
    * Base classes
@@ -66,7 +66,7 @@ var Truthful = (function(isNode) {
       var current = this.empty() ? "" : this.literal;
 
       var str = prev + current + next;
-      if (prev != "" || next != "") return "(" + str + ")";
+      if (prev !== "" || next !== "") return "(" + str + ")";
       return str;
     },
     string: function() {
@@ -94,7 +94,7 @@ var Truthful = (function(isNode) {
     this.expressions = expressions;
     var combinations = variables.map(function(variable, col) {
       return _.range(Math.pow(2, variables.length)).map(function(cell, row) {
-        return Math.floor(row/Math.pow(2, variables.length-col-1)) % 2 == 0;
+        return Math.floor(row/Math.pow(2, variables.length-col-1)) % 2 === 0;
       });
     });
     this.combinations = combinations;
@@ -158,7 +158,7 @@ var Truthful = (function(isNode) {
       });
       return [header].concat(this.table()).map(function(row, n) {
         var values = row.map(function(cell, index) {
-          if (n == 0) return _.pad(cell, maxLengths[index]);
+          if (n === 0) return _.pad(cell, maxLengths[index]);
           return _.pad((cell ? T : F), maxLengths[index]);
         });
         return values.slice(0, firstResult).join("|") + "||" + values.slice(firstResult).join("|");
@@ -182,14 +182,14 @@ var Truthful = (function(isNode) {
       input = result[2];
     }
 
-    if (input.length == 0) throw new Error("No tokens found in input");
+    if (input.length === 0) throw new Error("No tokens found in input");
 
     var tokenInput = [];
     while (input.length>0) {
-      var result = internal.firstMatch(input);
-      if (!result) throw new Error("Couldn't match token: " + input);
-      tokenInput.push(result);
-      input = input.substr(result.length);
+      var match = internal.firstMatch(input);
+      if (!match) throw new Error("Couldn't match token: " + input);
+      tokenInput.push(match);
+      input = input.substr(match.length);
     }
 
     return internal.parse(tokenInput).setLabel(label);
@@ -204,8 +204,8 @@ var Truthful = (function(isNode) {
     });
 
     var variables = Object.keys(_.reduce(
-      expressions.map(function(expr) { return expr.variables() }),
-      function(set, vars) { return _.merge(set, vars) },
+      expressions.map(function(expr) { return expr.variables(); }),
+      function(set, vars) { return _.merge(set, vars); },
       {}
     )).sort();
 
@@ -222,7 +222,7 @@ var Truthful = (function(isNode) {
   internal.indexOutsideBrackets = function(tokenInput, token) {
     var openBrackets = 0;
     for (var i = 0; i < tokenInput.length; i++) {
-      if (token.match(tokenInput[i]) && openBrackets == 0) return i;
+      if (token.match(tokenInput[i]) && openBrackets === 0) return i;
       if (internal.openBracket.match(tokenInput[i])) openBrackets++;
       if (internal.closeBracket.match(tokenInput[i])) openBrackets--;
     }
@@ -242,7 +242,7 @@ var Truthful = (function(isNode) {
 
   // Parses an array of token strings into a binary expression tree
   internal.parse = function(tokenInput) {
-    if (!tokenInput || tokenInput.length == 0) return new Expression();
+    if (!tokenInput || tokenInput.length === 0) return new Expression();
 
     if (internal.openBracket.match(tokenInput[0]) && internal.indexOutsideBrackets(tokenInput.slice(1), internal.closeBracket) == tokenInput.length-2) {
       return internal.parse(tokenInput.slice(1, -1));
@@ -278,41 +278,41 @@ var Truthful = (function(isNode) {
   internal.tokens = [
     new Token({
       pattern: /\w+/,
-      evaluate: function(vars) { return vars[this.literal] || false },
+      evaluate: function(vars) { return vars[this.literal] || false; },
       variable: true
     }),
     new Token({
       pattern: /true/,
-      evaluate: function() { return true }
+      evaluate: function() { return true; }
     }),
     new Token({
       pattern: /false/,
-      evaluate: function() { return false }
+      evaluate: function() { return false; }
     }),
     new Token({
       pattern: /!/,
-      validate: function() { return this.prev.empty() && !this.next.empty() },
-      evaluate: function(vars) { return !this.next.evaluate(vars) }
+      validate: function() { return this.prev.empty() && !this.next.empty(); },
+      evaluate: function(vars) { return !this.next.evaluate(vars); }
     }),
     new Token({
       pattern: /&/,
-      validate: function() { return !this.prev.empty() && !this.next.empty() },
-      evaluate: function(vars) { return this.prev.evaluate(vars) && this.next.evaluate(vars) }
+      validate: function() { return !this.prev.empty() && !this.next.empty(); },
+      evaluate: function(vars) { return this.prev.evaluate(vars) && this.next.evaluate(vars); }
     }),
     new Token({
       pattern: /\|/,
-      validate: function() { return !this.prev.empty() && !this.next.empty() },
-      evaluate: function(vars) { return this.prev.evaluate(vars) || this.next.evaluate(vars) }
+      validate: function() { return !this.prev.empty() && !this.next.empty(); },
+      evaluate: function(vars) { return this.prev.evaluate(vars) || this.next.evaluate(vars); }
     }),
     new Token({
       pattern: /=>/,
-      validate: function() { return !this.prev.empty() && !this.next.empty() },
-      evaluate: function(vars) { return !this.prev.evaluate(vars) || this.next.evaluate(vars) }
+      validate: function() { return !this.prev.empty() && !this.next.empty(); },
+      evaluate: function(vars) { return !this.prev.evaluate(vars) || this.next.evaluate(vars); }
     }),
     new Token({
       pattern: /<=>/,
-      validate: function() { return !this.prev.empty() && !this.next.empty() },
-      evaluate: function(vars) { return !((this.prev.evaluate(vars) && !this.next.evaluate(vars)) || (!this.prev.evaluate(vars) && this.next.evaluate(vars))) }
+      validate: function() { return !this.prev.empty() && !this.next.empty(); },
+      evaluate: function(vars) { return !((this.prev.evaluate(vars) && !this.next.evaluate(vars)) || (!this.prev.evaluate(vars) && this.next.evaluate(vars))); }
     })
   ];
 
